@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 # Tulsi-Inventory-Management
 =======
-# Wire Manufacturing Production Monitoring System
 
 A comprehensive, real-time production monitoring dashboard for wire manufacturing operations. Built for Tulsi Industries to track, analyze, and optimize the sequential production process from raw material to finished product.
 
