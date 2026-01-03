@@ -612,34 +612,54 @@ def get_statistics_summary(
     """
     Get comprehensive statistics summary for all stages
     """
-    analytics = ProductionAnalytics(db)
-    
-    if not end_date:
-        end_date = date.today()
-    if not start_date:
-        start_date = end_date - timedelta(days=30)
-    
-    stages_stats = []
-    
-    for stage in StageEnum:
-        stats = analytics.get_stage_statistics(stage, start_date, end_date)
-        stages_stats.append({
-            "stage": stage.value,
-            "total_input": stats.total_input,
-            "total_output": stats.total_output,
-            "total_scrap": stats.total_scrap,
-            "avg_efficiency": stats.avg_efficiency,
-            "avg_loss_percentage": stats.avg_loss_percentage,
-            "record_count": stats.record_count
-        })
-    
-    return {
-        "date_range": {
-            "start": start_date.isoformat(),
-            "end": end_date.isoformat()
-        },
-        "stages": stages_stats
-    }
+    try:
+        analytics = ProductionAnalytics(db)
+        
+        if not end_date:
+            end_date = date.today()
+        if not start_date:
+            start_date = end_date - timedelta(days=30)
+        
+        stages_stats = []
+        
+        # Filter stages to only include those in the configured sequence
+        # to avoid validation errors with non-production stages (e.g. Quality Check)
+        # Explicitly define valid production stages for analytics
+        valid_stages = ["RBD", "Inter", "Oven", "DPC", "Rewind"]
+        
+        for stage_name in valid_stages:
+            # Convert string to Enum if possible, or pass as is if analytics handles strings
+            # Analytics expects StageEnum, so let's try to map it
+            # But models.StageEnum has the values.
+            
+            try:
+                stage_enum = StageEnum(stage_name)
+            except ValueError:
+                continue
+                
+            stats = analytics.get_stage_statistics(stage_enum, start_date, end_date)
+            stages_stats.append({
+                "stage": stage_enum.value,
+                "total_input": stats.total_input,
+                "total_output": stats.total_output,
+                "total_scrap": stats.total_scrap,
+                "avg_efficiency": stats.avg_efficiency,
+                "avg_loss_percentage": stats.avg_loss_percentage,
+                "record_count": stats.record_count
+            })
+        
+        return {
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat()
+            },
+            "stages": stages_stats
+        }
+    except Exception as e:
+        import traceback
+        print("❌ Error in get_statistics_summary:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ==================== INVENTORY MANAGEMENT ENDPOINTS ====================
@@ -1518,10 +1538,20 @@ def move_batch_forward(
             from_stage=previous_stage,
             to_stage=target_stage,
             quantity=payload.quantity,
-            notes=f"Batch {batch.batch_number}: {payload.notes or 'Guided move'}",
+            notes=f"Moved by {payload.operator or 'Unknown'}: {payload.notes or ''}",
             batch_id=batch.id,
             batch_number=batch.batch_number
         )
+    except Exception as e:
+        import traceback
+        print(f"❌ Error in inventory move logic for batch {batch_id}:")
+        traceback.print_exc()
+        # Rollback needs to happen if we want to reverse db.add(event), 
+        # but db.flush() for event hasn't happened yet? 
+        # Actually db.add(event) was called.
+        # Let's verify if record_material_movement commits.
+        # It does db.commit().
+        raise HTTPException(status_code=500, detail=f"Inventory update failed: {str(e)}")
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
