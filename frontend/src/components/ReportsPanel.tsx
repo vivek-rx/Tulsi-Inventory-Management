@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
-import { Calendar, Download, Activity, PieChart, Layers, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Calendar, Download, Activity, Layers, TrendingUp, AlertTriangle } from 'lucide-react';
 import ProductionTable from './ProductionTable';
 import EfficiencyChart from './EfficiencyChart';
 import ScrapAnalysis from './ScrapAnalysis';
@@ -51,7 +51,7 @@ const ReportsPanel: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(formatDate(today));
 
   // Fetch Main Report Data
-  const { data, isLoading, refetch, isFetching } = useQuery<ProductionReportData>(
+  const { data, isLoading, isFetching } = useQuery<ProductionReportData>(
     ['production-report', startDate, endDate],
     async () => {
       const params = new URLSearchParams();

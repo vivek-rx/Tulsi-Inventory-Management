@@ -62,7 +62,7 @@ const ScrapAnalysis: React.FC<ScrapAnalysisProps> = ({ data, isLoading }) => {
                                 paddingAngle={5}
                                 dataKey="value"
                             >
-                                {data.map((entry, index) => (
+                                {data.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
@@ -107,7 +107,7 @@ const ScrapAnalysis: React.FC<ScrapAnalysisProps> = ({ data, isLoading }) => {
                                 }}
                             />
                             <Bar dataKey="value" name="Scrap (kg)" radius={[0, 4, 4, 0]}>
-                                {data.map((entry, index) => (
+                                {data.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Bar>
