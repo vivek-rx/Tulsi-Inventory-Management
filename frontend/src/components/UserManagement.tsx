@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { User, UserPlus, Trash2, ShieldCheck, Shield, AlertCircle, Loader2 } from 'lucide-react';
+import { UserPlus, Trash2, ShieldCheck, Shield, AlertCircle, Loader2 } from 'lucide-react';
 
 interface SystemUser {
     id: number;
@@ -94,7 +94,7 @@ const UserManagement: React.FC = () => {
                                     required
                                     value={newUser.full_name}
                                     onChange={e => setNewUser({ ...newUser, full_name: e.target.value })}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
                                     placeholder="e.g. John Doe"
                                 />
                             </div>
@@ -108,7 +108,7 @@ const UserManagement: React.FC = () => {
                                     required
                                     value={newUser.username}
                                     onChange={e => setNewUser({ ...newUser, username: e.target.value })}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
                                     placeholder="e.g. john.doe"
                                 />
                             </div>
@@ -122,7 +122,7 @@ const UserManagement: React.FC = () => {
                                     required
                                     value={newUser.password}
                                     onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -136,8 +136,8 @@ const UserManagement: React.FC = () => {
                                         type="button"
                                         onClick={() => setNewUser({ ...newUser, role: 'operator' })}
                                         className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${newUser.role === 'operator'
-                                                ? 'bg-blue-50 border-blue-200 text-blue-700'
-                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                            ? 'bg-blue-50 border-blue-200 text-blue-700'
+                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                     >
                                         Operator
@@ -146,8 +146,8 @@ const UserManagement: React.FC = () => {
                                         type="button"
                                         onClick={() => setNewUser({ ...newUser, role: 'admin' })}
                                         className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${newUser.role === 'admin'
-                                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                     >
                                         Admin
@@ -187,8 +187,8 @@ const UserManagement: React.FC = () => {
                                 <div key={user.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
                                     <div className="flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${user.role === 'admin'
-                                                ? 'bg-indigo-100 text-indigo-700'
-                                                : 'bg-blue-100 text-blue-700'
+                                            ? 'bg-indigo-100 text-indigo-700'
+                                            : 'bg-blue-100 text-blue-700'
                                             }`}>
                                             {user.full_name.charAt(0).toUpperCase()}
                                         </div>

@@ -52,6 +52,9 @@ class ProductionOrder(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
+    # Audit
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
     def __repr__(self):
         return f"<ProductionOrder(order_number={self.order_number}, customer={self.customer_name}, status={self.status})>"
 
@@ -123,6 +126,9 @@ class BatchTracking(Base):
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    # Audit
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     order = relationship("ProductionOrder", backref="batches")
     journey_events = relationship(

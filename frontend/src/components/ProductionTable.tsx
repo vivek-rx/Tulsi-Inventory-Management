@@ -61,6 +61,9 @@ const ProductionTable: React.FC<ProductionTableProps> = ({
                 Shift
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Operator
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                 Stage
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -99,6 +102,9 @@ const ProductionTable: React.FC<ProductionTableProps> = ({
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-700">
                     <span className="chip chip-muted">{record.shift}</span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-600">
+                    {record.operator_name || '-'}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-slate-900">
                     <span className="chip">{record.stage}</span>

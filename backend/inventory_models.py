@@ -60,8 +60,12 @@ class InventoryTransaction(Base):
     production_record_id = Column(Integer, ForeignKey('production_records.id'), nullable=True)
     
     # Transaction details
+    # Transaction details
     notes = Column(String, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Audit
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     def __repr__(self):
         return f"<InventoryTransaction(stage={self.stage}, type={self.transaction_type}, qty={self.quantity})>"

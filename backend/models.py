@@ -3,7 +3,7 @@ Database models for production monitoring system
 Represents the sequential wire manufacturing process:
 RBD → Inter → Oven → DPC → Rewind
 """
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, Text
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, Text, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 import enum
@@ -57,6 +57,9 @@ class ProductionRecord(Base):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Audit
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     def __repr__(self):
         return f"<ProductionRecord(date={self.date}, shift={self.shift}, stage={self.stage}, output={self.output_qty})>"

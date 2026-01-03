@@ -51,6 +51,7 @@ export interface ProductionRecord {
   loss_percentage?: number;
   created_at: string;
   remarks?: string;
+  operator_name?: string;
 }
 
 export interface StageStats {

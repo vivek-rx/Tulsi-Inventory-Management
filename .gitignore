@@ -24,8 +24,6 @@ dist/
 *.swp
 
 # Environment
-.env
-.env.local
 
 # Docker
 .dockerignore
