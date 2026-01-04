@@ -44,7 +44,7 @@ const LoginPage: React.FC = () => {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10">
                 <div className="p-8 md:p-10">
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
+                        <div className="inline-flex items-center justify-center w-48 h-48 mb-6">
                             <img src="/tulsi-logo.png" alt="Tulsi Power Industries" className="w-full h-full object-contain" />
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
