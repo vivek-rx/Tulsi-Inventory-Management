@@ -43,11 +43,21 @@ class Token(BaseModel):
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    print(f"Login attempt for user: {form_data.username}")
     user = db.query(User).filter(User.username == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    if not user:
+        print(f"User {form_data.username} NOT FOUND in database")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail=f"User '{form_data.username}' not found. please contact admin.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not verify_password(form_data.password, user.hashed_password):
+        print(f"Password mismatch for user {form_data.username}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
