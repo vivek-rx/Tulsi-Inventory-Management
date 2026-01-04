@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User, Loader2, ShieldCheck } from 'lucide-react';
+import { Lock, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const LoginPage: React.FC = () => {
