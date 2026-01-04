@@ -28,7 +28,14 @@ const LoginPage: React.FC = () => {
             login(access_token, user);
         } catch (err: any) {
             console.error('Login error:', err);
-            setError(err.response?.data?.detail || 'Failed to login. Please check your credentials.');
+            const status = err.response?.status;
+            const data = err.response?.data;
+            const detail = data?.detail;
+
+            // Should show: "Login Failed: 500 - [HTML]" or "Login Failed: 404 - Not Found"
+            const debugMsg = `Status: ${status || 'Network Error'} - ${typeof data === 'object' ? JSON.stringify(data) : data || err.message}`;
+
+            setError(detail || debugMsg);
         } finally {
             setIsLoading(false);
         }
