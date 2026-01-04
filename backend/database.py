@@ -63,14 +63,17 @@ def get_db():
         db.close()
 
 def init_db():
-    """
-    Initialize database - create all tables
-    """
-    # Import all models to ensure they're registered
-    import models
-    import inventory_models
-    import order_models
-    import final_stage_models
-    import user_models
-    
-    Base.metadata.create_all(bind=engine)
+    """Initialize database tables"""
+    try:
+        # Import all models to ensure they're registered with SQLAlchemy
+        from models import ProductionRecord, StageConfiguration
+        from inventory_models import StageInventory, InventoryTransaction, MaterialMovement
+        from order_models import ProductionOrder, OrderStageProgress, BatchTracking, BatchJourneyEvent
+        from user_models import User
+        from final_stage_models import QualityCheck, PackagingRecord, DispatchRecord
+        
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables initialized")
+    except Exception as e:
+        print(f"⚠️ Database initialization error (may already exist): {e}")
+        # Don't crash if tables already exist
