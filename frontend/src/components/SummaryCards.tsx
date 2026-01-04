@@ -8,7 +8,8 @@ import type { DashboardSummary } from '../types';
 
 interface SummaryCardsProps {
   summary: DashboardSummary | undefined;
-  isLoading?: boolean;
+  isLoading: boolean;
+  error?: any;
 }
 
 type CardConfig = {
@@ -25,7 +26,16 @@ type CardConfig = {
   progressLabel?: string;
 };
 
-const SummaryCards: React.FC<SummaryCardsProps> = ({ summary, isLoading }) => {
+const SummaryCards: React.FC<SummaryCardsProps> = ({ summary, isLoading, error }) => {
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center animate-pulse">
+        <p className="text-red-600 font-bold mb-2">Failed to load dashboard data</p>
+        <p className="text-sm text-red-500 font-mono">{error.message || JSON.stringify(error)}</p>
+      </div>
+    );
+  }
+
   if (isLoading || !summary) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

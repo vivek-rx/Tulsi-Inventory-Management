@@ -98,7 +98,7 @@ function AuthenticatedApp() {
   };
 
   // Data fetching
-  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useQuery(
+  const { data: summary, isLoading: summaryLoading, error: summaryError, refetch: refetchSummary } = useQuery(
     ['summary', startDate, endDate],
     () => getDashboardSummary(queryParams),
     { refetchInterval: 60000 }
@@ -461,7 +461,7 @@ function AuthenticatedApp() {
                   <DateFilter startDate={startDate} endDate={endDate} onStartDateChange={setStartDate} onEndDateChange={setEndDate} />
                 </div>
                 <ShiftProgress />
-                <SummaryCards summary={summary} isLoading={summaryLoading} />
+                <SummaryCards summary={summary} isLoading={summaryLoading} error={summaryError} />
                 <InventoryOverview inventory={inventory || []} />
                 <ProcessFlow nodes={processFlow || []} isLoading={flowLoading} />
                 <ProductionCharts timelineData={timelineData?.timeline || []} stageStats={statsData?.stages || []} isLoading={timelineLoading || statsLoading} />
