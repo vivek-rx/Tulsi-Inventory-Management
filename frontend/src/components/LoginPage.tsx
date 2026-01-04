@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Lock, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import tulsiLogo from '../assets/tulsi-logo.png';
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -26,21 +27,8 @@ const LoginPage: React.FC = () => {
             const { access_token, user } = response.data;
             login(access_token, user);
         } catch (err: any) {
-            console.error('Login error FULL OBJECT:', err);
-            const status = err.response?.status;
-            const data = err.response?.data;
-            const detail = data?.detail;
-
-            let displayError = `Login Failed`;
-            if (detail) {
-                displayError = detail;
-            } else if (status) {
-                displayError = `Request Failed: ${status} - ${JSON.stringify(data || err.message)}`;
-            } else {
-                displayError = `Network/Unknown Error: ${err.message}`;
-            }
-
-            setError(displayError);
+            console.error('Login error:', err);
+            setError(err.response?.data?.detail || 'Failed to login. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +46,7 @@ const LoginPage: React.FC = () => {
                 <div className="p-8 md:p-10">
                     <div className="text-center mb-8">
                         <div className="inline-flex items-center justify-center w-32 h-32 mb-6">
-                            <img src="/tulsi-logo.png" alt="Tulsi Power Industries" className="w-full h-full object-contain" />
+                            <img src={tulsiLogo} alt="Tulsi Power Industries" className="w-full h-full object-contain" />
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
                         <p className="text-slate-500 mt-2">Sign in to access the production system</p>
@@ -68,14 +56,6 @@ const LoginPage: React.FC = () => {
                         {error && (
                             <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-shake break-words">
                                 {error}
-                                {process.env.NODE_ENV === 'production' && (
-                                    <details className="mt-2 text-xs text-red-400">
-                                        <summary>Debug Info</summary>
-                                        <pre className="whitespace-pre-wrap mt-1">
-                                            {/* Just showing the error message is enough, the hook already serializes it */}
-                                        </pre>
-                                    </details>
-                                )}
                             </div>
                         )}
 
