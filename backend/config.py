@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./production_monitoring.db"
     
     # CORS - adjust for production
-    cors_origins: list = ["http://localhost:5173", "http://localhost:3000"]
+    # CORS - adjust for production
+    cors_origins: list = ["*"]
     
     # Performance thresholds
     efficiency_warning_threshold: float = 90.0  # Yellow warning below this

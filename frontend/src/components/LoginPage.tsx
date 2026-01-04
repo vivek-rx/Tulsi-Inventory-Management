@@ -27,9 +27,20 @@ const LoginPage: React.FC = () => {
             login(access_token, user);
         } catch (err: any) {
             console.error('Login error FULL OBJECT:', err);
-            console.error('Response status:', err.response?.status);
-            console.error('Response data:', err.response?.data);
-            setError(err.response?.data?.detail || `Login Failed: ${err.message} (Status: ${err.response?.status})`);
+            const status = err.response?.status;
+            const data = err.response?.data;
+            const detail = data?.detail;
+
+            let displayError = `Login Failed`;
+            if (detail) {
+                displayError = detail;
+            } else if (status) {
+                displayError = `Request Failed: ${status} - ${JSON.stringify(data || err.message)}`;
+            } else {
+                displayError = `Network/Unknown Error: ${err.message}`;
+            }
+
+            setError(displayError);
         } finally {
             setIsLoading(false);
         }
@@ -55,8 +66,16 @@ const LoginPage: React.FC = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
-                            <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-shake">
+                            <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-shake break-words">
                                 {error}
+                                {process.env.NODE_ENV === 'production' && (
+                                    <details className="mt-2 text-xs text-red-400">
+                                        <summary>Debug Info</summary>
+                                        <pre className="whitespace-pre-wrap mt-1">
+                                            {/* Just showing the error message is enough, the hook already serializes it */}
+                                        </pre>
+                                    </details>
+                                )}
                             </div>
                         )}
 
