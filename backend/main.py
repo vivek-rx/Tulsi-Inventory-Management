@@ -305,14 +305,7 @@ def _parse_hold_history(raw_notes: Optional[str]) -> List[dict]:
     except (json.JSONDecodeError, TypeError):
         return []
     return []
-@app.get("/")
-def root():
-    """API health check"""
-    return {
-        "message": "Wire Manufacturing Production Monitor API",
-        "version": settings.app_version,
-        "status": "operational"
-    }
+# Root route removed - frontend served by Vercel static hosting
 
 @app.get("/api/summary", response_model=DashboardSummary)
 def get_dashboard_summary(
