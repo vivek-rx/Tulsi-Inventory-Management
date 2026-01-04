@@ -69,18 +69,25 @@ async def startup_event():
         
         # Create default admin user if not exists
         admin_user = db.query(User).filter(User.username == "admin").first()
+        admin_pwd_hash = get_password_hash("admin123")
+        
         if not admin_user:
             print("Creating default admin user...")
-            hashed_password = get_password_hash("admin123")
             new_admin = User(
                 username="admin",
                 full_name="System Administrator",
-                hashed_password=hashed_password,
+                hashed_password=admin_pwd_hash,
                 role=UserRole.ADMIN
             )
             db.add(new_admin)
             db.commit()
             print("✅ Default admin user created (admin/admin123)")
+        else:
+            # Force update password to ensure access
+            print("Updating admin password to default...")
+            admin_user.hashed_password = admin_pwd_hash
+            db.commit()
+            print("✅ Admin password reset to 'admin123'")
             
         # Create default operator user if not exists
         operator_user = db.query(User).filter(User.username == "operator").first()
