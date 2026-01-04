@@ -59,53 +59,65 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables and inventory on startup"""
-    init_db()
+    import os
     
-    # Initialize inventory tracking and default users
-    db = SessionLocal()
+    # Skip heavy initialization on Vercel serverless (it runs on every cold start)
+    is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None
+    
     try:
-        inventory_mgr = InventoryManager(db)
-        inventory_mgr.initialize_inventory()
+        init_db()
         
-        # Create default admin user if not exists
-        admin_user = db.query(User).filter(User.username == "admin").first()
-        admin_pwd_hash = get_password_hash("admin123")
-        
-        if not admin_user:
-            print("Creating default admin user...")
-            new_admin = User(
-                username="admin",
-                full_name="System Administrator",
-                hashed_password=admin_pwd_hash,
-                role=UserRole.ADMIN
-            )
-            db.add(new_admin)
-            db.commit()
-            print("✅ Default admin user created (admin/admin123)")
+        # Only run user creation and inventory init locally, not on Vercel
+        if not is_vercel:
+            db = SessionLocal()
+            try:
+                inventory_mgr = InventoryManager(db)
+                inventory_mgr.initialize_inventory()
+                
+                # Create default admin user if not exists
+                admin_user = db.query(User).filter(User.username == "admin").first()
+                admin_pwd_hash = get_password_hash("admin123")
+                
+                if not admin_user:
+                    print("Creating default admin user...")
+                    new_admin = User(
+                        username="admin",
+                        full_name="System Administrator",
+                        hashed_password=admin_pwd_hash,
+                        role=UserRole.ADMIN
+                    )
+                    db.add(new_admin)
+                    db.commit()
+                    print("✅ Default admin user created (admin/admin123)")
+                else:
+                    # Force update password to ensure access
+                    print("Updating admin password to default...")
+                    admin_user.hashed_password = admin_pwd_hash
+                    db.commit()
+                    print("✅ Admin password reset to 'admin123'")
+                    
+                # Create default operator user if not exists
+                operator_user = db.query(User).filter(User.username == "operator").first()
+                if not operator_user:
+                    print("Creating default operator user...")
+                    hashed_password = get_password_hash("operator123")
+                    new_operator = User(
+                        username="operator",
+                        full_name="Machine Operator",
+                        hashed_password=hashed_password,
+                        role=UserRole.OPERATOR
+                    )
+                    db.add(new_operator)
+                    db.commit()
+                    print("✅ Default operator user created (operator/operator123)")
+                    
+            finally:
+                db.close()
         else:
-            # Force update password to ensure access
-            print("Updating admin password to default...")
-            admin_user.hashed_password = admin_pwd_hash
-            db.commit()
-            print("✅ Admin password reset to 'admin123'")
-            
-        # Create default operator user if not exists
-        operator_user = db.query(User).filter(User.username == "operator").first()
-        if not operator_user:
-            print("Creating default operator user...")
-            hashed_password = get_password_hash("operator123")
-            new_operator = User(
-                username="operator",
-                full_name="Machine Operator",
-                hashed_password=hashed_password,
-                role=UserRole.OPERATOR
-            )
-            db.add(new_operator)
-            db.commit()
-            print("✅ Default operator user created (operator/operator123)")
-            
-    finally:
-        db.close()
+            print("⚡ Running on Vercel - skipping heavy startup tasks")
+    except Exception as e:
+        print(f"⚠️ Startup event error (non-fatal): {e}")
+        # Don't crash the app if startup fails
 
 def _update_order_stage_progress(
     db: Session,
