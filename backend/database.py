@@ -66,11 +66,11 @@ def init_db():
     """Initialize database tables"""
     try:
         # Import all models to ensure they're registered with SQLAlchemy
-        from models import ProductionRecord, StageConfiguration
-        from inventory_models import StageInventory, InventoryTransaction, MaterialMovement
-        from order_models import ProductionOrder, OrderStageProgress, BatchTracking, BatchJourneyEvent
-        from user_models import User
-        from final_stage_models import QualityCheck, PackagingRecord, DispatchRecord
+        from backend.models import ProductionRecord, StageConfiguration
+        from backend.inventory_models import StageInventory, InventoryTransaction, MaterialMovement
+        from backend.order_models import ProductionOrder, OrderStageProgress, BatchTracking, BatchJourneyEvent
+        from backend.user_models import User
+        from backend.final_stage_models import QualityCheck, PackagingRecord, DispatchRecord
         
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables initialized")
