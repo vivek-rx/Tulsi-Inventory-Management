@@ -16,24 +16,23 @@ from typing import List, Optional
 from datetime import date, timedelta, datetime
 from pydantic import BaseModel, Field
 
-from database import get_db, init_db, SessionLocal
-from models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
-from inventory_models import StageInventory, InventoryTransaction, MaterialMovement
-from order_models import ProductionOrder, OrderStageProgress, BatchTracking, OrderStatus, BatchJourneyEvent
-from schemas import (
+from backend.database import get_db, init_db, SessionLocal
+from backend.models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
+from backend.inventory_models import StageInventory, InventoryTransaction, MaterialMovement
+from backend.order_models import ProductionOrder, OrderStageProgress, BatchTracking, OrderStatus, BatchJourneyEvent
+from backend.schemas import (
     ProductionRecordCreate, ProductionRecordResponse,
     DashboardSummary, StageDetailResponse, StageStats,
     ProcessFlowNode, AlertsResponse, Alert
 )
-from analytics import ProductionAnalytics
-from inventory_manager import InventoryManager
-from inventory_manager import InventoryManager
-from config import settings
+from backend.analytics import ProductionAnalytics
+from backend.inventory_manager import InventoryManager
+from backend.config import settings
 
-from user_models import User, UserRole
-from auth import get_password_hash
-import user_routes
-import final_stage_routes
+from backend.user_models import User, UserRole
+from backend.auth import get_password_hash
+from backend import user_routes
+from backend import final_stage_routes
 
 # Initialize FastAPI app
 app = FastAPI(
