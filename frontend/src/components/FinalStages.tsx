@@ -48,7 +48,7 @@ export const QualityCheckForm: React.FC<{ batchId: number; onSuccess?: () => voi
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`http://localhost:8000/api/batches/${batchId}/quality-check`, {
+            const response = await fetch(`/api/batches/${batchId}/quality-check`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -161,7 +161,7 @@ export const PackagingForm: React.FC<{ batchId: number; onSuccess?: () => void }
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`http://localhost:8000/api/batches/${batchId}/package`, {
+            const response = await fetch(`/api/batches/${batchId}/package`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -289,7 +289,7 @@ export const DispatchForm: React.FC<{ orderId: number; onSuccess?: () => void }>
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`http://localhost:8000/api/orders/${orderId}/dispatch`, {
+            const response = await fetch(`/api/orders/${orderId}/dispatch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

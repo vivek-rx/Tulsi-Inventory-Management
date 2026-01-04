@@ -57,7 +57,7 @@ const ReportsPanel: React.FC = () => {
       const params = new URLSearchParams();
       if (startDate) params.append('start_date', startDate);
       if (endDate) params.append('end_date', endDate);
-      const response = await fetch(`http://localhost:8000/api/reports/production-summary?${params.toString()}`);
+      const response = await fetch(`/api/reports/production-summary?${params.toString()}`);
       if (!response.ok) {
         throw new Error('Failed to load report');
       }
@@ -87,8 +87,8 @@ const ReportsPanel: React.FC = () => {
       if (endDate) params.append('end_date', endDate);
 
       const endpoint = type === 'excel'
-        ? `http://localhost:8000/api/reports/production/export?${params.toString()}`
-        : `http://localhost:8000/api/reports/production/export/pdf?${params.toString()}`;
+        ? `/api/reports/production/export?${params.toString()}`
+        : `/api/reports/production/export/pdf?${params.toString()}`;
 
       const response = await fetch(endpoint);
 

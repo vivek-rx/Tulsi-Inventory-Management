@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
             params.append('username', username);
             params.append('password', password);
 
-            const response = await axios.post('http://localhost:8000/api/token', params);
+            const response = await axios.post('/api/token', params);
 
             const { access_token, user } = response.data;
             login(access_token, user);
