@@ -5,8 +5,8 @@ Track customer orders through production stages
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Date, Enum as SQLEnum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
-from models import StageEnum
+from backend.database import Base
+from backend.models import StageEnum
 import enum
 
 class OrderStatus(str, enum.Enum):

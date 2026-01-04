@@ -4,11 +4,11 @@ Handles production metrics, bottleneck detection, and WIP calculations
 """
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
-from models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
-from schemas import StageStats, ProcessFlowNode, Alert, TimelineDataPoint
+from backend.models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
+from backend.schemas import StageStats, ProcessFlowNode, Alert, TimelineDataPoint
 from datetime import date, timedelta
 from typing import List, Optional, Dict
-from config import settings
+from backend.config import settings
 
 class ProductionAnalytics:
     """

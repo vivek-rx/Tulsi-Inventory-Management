@@ -5,9 +5,9 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import timedelta
 
-from database import get_db
+from backend.database import get_db
 from user_models import User, UserRole
-from auth import (
+from backend.auth import (
     verify_password,
     get_password_hash,
     create_access_token,

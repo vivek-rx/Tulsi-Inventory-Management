@@ -5,7 +5,7 @@ RBD → Inter → Oven → DPC → Rewind
 """
 from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, Text, ForeignKey
 from sqlalchemy.sql import func
-from database import Base
+from backend.database import Base
 import enum
 
 class ShiftEnum(str, enum.Enum):

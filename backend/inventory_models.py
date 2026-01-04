@@ -5,8 +5,8 @@ Tracks stock levels at each production stage
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
-from models import StageEnum
+from backend.database import Base
+from backend.models import StageEnum
 
 class StageInventory(Base):
     """

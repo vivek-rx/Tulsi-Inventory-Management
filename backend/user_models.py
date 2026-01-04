@@ -3,7 +3,7 @@ User models for authentication and role-based access control
 """
 from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
 from sqlalchemy.sql import func
-from database import Base
+from backend.database import Base
 import enum
 
 class UserRole(str, enum.Enum):

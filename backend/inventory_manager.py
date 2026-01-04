@@ -7,7 +7,7 @@ from sqlalchemy import func, and_, desc
 from datetime import datetime, date
 from typing import List, Dict, Optional
 from inventory_models import StageInventory, InventoryTransaction, MaterialMovement
-from models import ProductionRecord, StageEnum
+from backend.models import ProductionRecord, StageEnum
 
 class InventoryManager:
     """
