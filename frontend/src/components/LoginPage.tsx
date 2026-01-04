@@ -26,8 +26,10 @@ const LoginPage: React.FC = () => {
             const { access_token, user } = response.data;
             login(access_token, user);
         } catch (err: any) {
-            console.error('Login error:', err);
-            setError(err.response?.data?.detail || 'Failed to login. Please check your credentials.');
+            console.error('Login error FULL OBJECT:', err);
+            console.error('Response status:', err.response?.status);
+            console.error('Response data:', err.response?.data);
+            setError(err.response?.data?.detail || `Login Failed: ${err.message} (Status: ${err.response?.status})`);
         } finally {
             setIsLoading(false);
         }
@@ -44,7 +46,7 @@ const LoginPage: React.FC = () => {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10">
                 <div className="p-8 md:p-10">
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-48 h-48 mb-6">
+                        <div className="inline-flex items-center justify-center w-32 h-32 mb-6">
                             <img src="/tulsi-logo.png" alt="Tulsi Power Industries" className="w-full h-full object-contain" />
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900">Welcome Back</h1>
