@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date
 from backend.database import get_db
-from final_stage_models import QualityInspection, PackagingRecord, DispatchRecord
-from order_models import BatchTracking, ProductionOrder
+from backend.final_stage_models import QualityInspection, PackagingRecord, DispatchRecord
+from backend.order_models import BatchTracking, ProductionOrder
 from backend.models import StageEnum
 
 router = APIRouter()

@@ -5,9 +5,9 @@ Handles parsing of TULSI PI PRODUCTION REPORT.xlsx
 import pandas as pd
 from datetime import datetime
 from sqlalchemy.orm import Session
-from models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
-from inventory_manager import InventoryManager
-from database import SessionLocal, init_db
+from backend.models import ProductionRecord, StageConfiguration, StageEnum, ShiftEnum
+from backend.inventory_manager import InventoryManager
+from backend.database import SessionLocal, init_db
 from typing import Optional
 import logging
 

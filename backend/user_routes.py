@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from datetime import timedelta
 
 from backend.database import get_db
-from user_models import User, UserRole
+from backend.user_models import User, UserRole
 from backend.auth import (
     verify_password,
     get_password_hash,

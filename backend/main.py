@@ -2152,5 +2152,5 @@ if __name__ == "__main__":
 
 # ==================== FINAL STAGES ROUTES ====================
 # Include final stage routes (Quality Check, Packaging, Dispatch)
-from final_stage_routes import router as final_stage_router
+from backend.final_stage_routes import router as final_stage_router
 app.include_router(final_stage_router, prefix="/api", tags=["Final Stages"])
