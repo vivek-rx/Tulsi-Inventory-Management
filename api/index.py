@@ -1,14 +1,14 @@
 """
-Vercel Serverless Function Entry Point
-This file imports the FastAPI app from backend/main.py and exposes it for Vercel
+Minimal Vercel Test - Step 1: Basic FastAPI
 """
-import sys
-from pathlib import Path
+from fastapi import FastAPI
 
-# Add the parent directory to the Python path so we can import from backend
-sys.path.insert(0, str(Path(__file__).parent.parent))
+app = FastAPI()
 
-from backend.main import app
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Vercel is working!"}
 
-# Vercel will use this 'app' variable as the ASGI application
-# The app is already configured with all routes, middleware, and startup events in backend/main.py
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy", "vercel": True}
