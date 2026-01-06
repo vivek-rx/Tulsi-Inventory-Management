@@ -44,11 +44,20 @@ app = FastAPI(
 # Root endpoint for health check
 @app.get("/")
 async def root():
+    import os
+    use_supabase = os.getenv("USE_SUPABASE", "false")
+    db_url = os.getenv("DATABASE_URL") or os.getenv("SUPABASE_DB_URL")
+    
     return {
         "status": "online",
         "message": "Tulsi Inventory Management API System is Running",
         "version": settings.app_version,
-        "docs": "/docs"
+        "docs": "/docs",
+        "debug_config": {
+            "use_supabase_env": use_supabase,
+            "has_db_url": bool(db_url),
+            "db_type": "postgres" if (use_supabase.lower() == "true" and db_url) else "sqlite"
+        }
     }
 
 # Include Routers
