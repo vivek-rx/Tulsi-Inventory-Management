@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Lock, User, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api';
 import tulsiLogo from '../assets/tulsi-logo.png';
 
 const LoginPage: React.FC = () => {
@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
             params.append('username', username);
             params.append('password', password);
 
-            const response = await axios.post('/api/token', params);
+            const response = await api.post('/token', params);
 
             const { access_token, user } = response.data;
             login(access_token, user);
