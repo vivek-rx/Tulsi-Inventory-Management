@@ -22,7 +22,11 @@ const LoginPage: React.FC = () => {
             params.append('username', username);
             params.append('password', password);
 
-            const response = await api.post('/token', params);
+            const response = await api.post('/token', params, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
 
             const { access_token, user } = response.data;
             login(access_token, user);
