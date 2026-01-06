@@ -11,42 +11,29 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Use Supabase PostgreSQL or fallback to SQLite
-USE_SUPABASE = os.getenv("USE_SUPABASE", "false").lower() == "true"
+# PRODUCTION: Always use Supabase/PostgreSQL
+USE_SUPABASE = True  # Enforce True
+DATABASE_URL = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
 
-if USE_SUPABASE:
-    DATABASE_URL = os.getenv("SUPABASE_DB_URL")
-    if not DATABASE_URL:
-        # Try finding DATABASE_URL if SUPABASE_DB_URL is missing
-        DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    # Error out if no DB URL found (don't fallback to broken sqlite)
+    print("❌ CRITICAL: DATABASE_URL is missing! Application cannot start.")
+    print("Please set USE_SUPABASE=true and DATABASE_URL in environment variables.")
+    raise Exception("DATABASE_URL environment variable is required.")
+
+# Fix for SQLAlchemy >= 1.4 which deprecated postgres://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
-    if not DATABASE_URL:
-        print("⚠️ Warning: USE_SUPABASE is true but no URL found. Falling back to SQLite.")
-        USE_SUPABASE = False
-        DATABASE_URL = "sqlite:///./production_monitoring.db"
-    else:
-        # Fix for SQLAlchemy >= 1.4 which deprecated postgres://
-        if DATABASE_URL.startswith("postgres://"):
-            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-            
-        engine = create_engine(
-            DATABASE_URL,
-            echo=False,
-            pool_pre_ping=True,  # Verify connections before using
-            pool_size=5,
-            max_overflow=10,
-            pool_recycle=300  # Recycle connections every 5 minutes
-        )
-        print("✅ Connected to Supabase PostgreSQL")
-
-if not USE_SUPABASE:
-    DATABASE_URL = "sqlite:///./production_monitoring.db"
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False},  # Needed for SQLite
-        echo=False
-    )
-    print("✅ Using SQLite database")
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_pre_ping=True,  # Verify connections before using
+    pool_size=5,
+    max_overflow=10,
+    pool_recycle=300  # Recycle connections every 5 minutes
+)
+print("✅ Connected to Supabase PostgreSQL")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
