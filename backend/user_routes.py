@@ -43,35 +43,44 @@ class Token(BaseModel):
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    print(f"Login attempt for user: {form_data.username}")
-    user = db.query(User).filter(User.username == form_data.username).first()
-    if not user:
-        print(f"User {form_data.username} NOT FOUND in database")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"User '{form_data.username}' not found. please contact admin.",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        print(f"Login attempt for user: {form_data.username}")
+        user = db.query(User).filter(User.username == form_data.username).first()
+        if not user:
+            print(f"User {form_data.username} NOT FOUND in database")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"User '{form_data.username}' not found. please contact admin.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        if not verify_password(form_data.password, user.hashed_password):
+            print(f"Password mismatch for user {form_data.username}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.username, "role": user.role.value},
+            expires_delta=access_token_expires
         )
-    
-    if not verify_password(form_data.password, user.hashed_password):
-        print(f"Password mismatch for user {form_data.username}")
+        
+        return {
+            "access_token": access_token, 
+            "token_type": "bearer",
+            "user": user
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"LOGIN ERROR: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
         )
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username, "role": user.role.value},
-        expires_delta=access_token_expires
-    )
-    
-    return {
-        "access_token": access_token, 
-        "token_type": "bearer",
-        "user": user
-    }
 
 @router.get("/users/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
