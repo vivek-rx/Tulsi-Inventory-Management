@@ -13,7 +13,13 @@ class Settings(BaseSettings):
     
     # CORS - adjust for production
     # CORS - adjust for production
-    cors_origins: list = ["*"]
+    # CORS - adjust for production
+    cors_origins: list = [
+        "http://localhost:5173",
+        "https://tulsi-inventory.vercel.app",
+        "https://tulsi-inventory-management-web.vercel.app",
+        "*"  # Keep wildcard for now as fallback
+    ]
     
     # Performance thresholds
     efficiency_warning_threshold: float = 90.0  # Yellow warning below this
