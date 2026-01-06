@@ -30,6 +30,7 @@ const LoginPage: React.FC = () => {
             console.error('Login error:', err);
             const status = err.response?.status;
             const data = err.response?.data;
+            const detail = data?.detail;
             // Handle 422 Validation Errors (Detail is array of objects)
             let errorMessage = detail;
             if (typeof detail === 'object') {
