@@ -41,6 +41,16 @@ app = FastAPI(
     description="Real-time production monitoring for wire manufacturing factory"
 )
 
+# Root endpoint for health check
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "message": "Tulsi Inventory Management API System is Running",
+        "version": settings.app_version,
+        "docs": "/docs"
+    }
+
 # Include Routers
 app.include_router(user_routes.router, prefix="/api", tags=["Authentication"])
 app.include_router(final_stage_routes.router, prefix="/api", tags=["Final Stages"])
