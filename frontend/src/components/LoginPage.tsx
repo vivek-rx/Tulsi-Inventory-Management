@@ -30,12 +30,16 @@ const LoginPage: React.FC = () => {
             console.error('Login error:', err);
             const status = err.response?.status;
             const data = err.response?.data;
-            const detail = data?.detail;
+            // Handle 422 Validation Errors (Detail is array of objects)
+            let errorMessage = detail;
+            if (typeof detail === 'object') {
+                errorMessage = JSON.stringify(detail);
+            }
 
             // Should show: "Login Failed: 500 - [HTML]" or "Login Failed: 404 - Not Found"
             const debugMsg = `Status: ${status || 'Network Error'} - ${typeof data === 'object' ? JSON.stringify(data) : data || err.message}`;
 
-            setError(detail || debugMsg);
+            setError(errorMessage || debugMsg);
         } finally {
             setIsLoading(false);
         }
