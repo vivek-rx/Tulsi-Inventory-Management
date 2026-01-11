@@ -18,6 +18,14 @@ DATABASE_URL = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     # Error out if no DB URL found (don't fallback to broken sqlite)
     print("❌ CRITICAL: DATABASE_URL is missing! Application cannot start.")
+    
+    # DEBUG: Print what we HAVE so user can see
+    print("--- DEBUG: AVAILABLE ENVIRONMENT VARIABLES ---")
+    keys = [k for k in os.environ.keys()]
+    print(f"Total Keys: {len(keys)}")
+    print(f"Keys: {', '.join(keys)}")
+    print("---------------------------------------------")
+    
     print("Please set USE_SUPABASE=true and DATABASE_URL in environment variables.")
     raise Exception("DATABASE_URL environment variable is required.")
 
