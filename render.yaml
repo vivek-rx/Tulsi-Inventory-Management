@@ -19,11 +19,10 @@ services:
       - key: PYTHONPATH
         value: /opt/render/project/src
 
-  # Frontend Static Site (no region for static sites)
+  # Frontend Static Site
   - type: web
     name: tulsi-inventory-web
     runtime: static
-    plan: free
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
