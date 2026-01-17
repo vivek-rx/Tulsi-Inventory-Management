@@ -12,13 +12,14 @@ class Settings(BaseSettings):
     database_url: str = "https://zwlkrnsefjwxqeilosuc.supabase.co"
     
     # CORS - adjust for production
-    # CORS - adjust for production
     cors_origins: list = [
         "http://localhost:5173",
         "http://localhost:3000",
         "https://tulsi-inventory.vercel.app",
         "https://tulsi-inventory-management-web.vercel.app",
-        "https://tulsi-inventory-management.vercel.app"
+        "https://tulsi-inventory-management.vercel.app",
+        "https://tulsi-inventory-web.onrender.com",
+        "https://tulsi-inventory-api.onrender.com"
     ]
     
     # Performance thresholds
