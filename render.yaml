@@ -10,12 +10,14 @@ services:
     plan: free
     branch: main
     buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd /opt/render/project/src && PYTHONPATH=/opt/render/project/src uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         sync: false  # Set manually in Render dashboard
       - key: PYTHON_VERSION
         value: "3.11"
+      - key: PYTHONPATH
+        value: /opt/render/project/src
 
   # Frontend Static Site
   - type: web
