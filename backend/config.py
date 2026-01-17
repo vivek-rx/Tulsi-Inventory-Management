@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     
     # Database
-    database_url: str = ""
+    database_url: str = "https://zwlkrnsefjwxqeilosuc.supabase.co"
     
     # CORS - adjust for production
     # CORS - adjust for production

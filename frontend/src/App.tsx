@@ -261,10 +261,10 @@ function AuthenticatedApp() {
           {/* Logo */}
           <div className="flex items-center justify-center py-4 transition-all duration-300">
             <div className={`transition-all duration-300 ${isDesktopSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-full px-4'}`}>
-              <img src="/tulsi-logo.png" alt="Tulsi Power Industry" className="h-16 w-full object-contain" />
+              <img src="/tulsi-logo.png" alt="Tulsi Power Industry" className="h-24 w-full object-contain" />
             </div>
             <div className={`transition-all duration-300 ${!isDesktopSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-full flex items-center justify-center'}`}>
-              <img src="/tulsi-logo.png" alt="Tulsi" className="h-14 w-14 object-contain" />
+              <img src="/tulsi-logo.png" alt="Tulsi" className="h-16 w-16 object-contain" />
             </div>
           </div>
 
@@ -528,7 +528,7 @@ function AuthenticatedApp() {
         <footer className="relative bg-white/90 border-t border-slate-200 backdrop-blur-xl px-6 py-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between text-sm text-slate-600 gap-3">
-              <p>© 2024 Tulsi Power Industries · Production Monitoring System</p>
+              <p>© 2026 Tulsi Power Industries · Production Monitoring System</p>
               <p className="font-semibold text-slate-800">Process Spine: RBD → Inter → Oven → DPC → Rewind → Quality Check → Packaging → Dispatch</p>
             </div>
           </div>
