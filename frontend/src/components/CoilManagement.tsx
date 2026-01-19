@@ -560,7 +560,7 @@ const GuidedMoveModal: React.FC<{ batchId: number | null; isOpen: boolean; onClo
                                 <div className="space-y-2">
                                     {data.journey_events
                                         .filter(e => e.output_wire_size_mm)
-                                        .map((event, idx) => (
+                                        .map((event) => (
                                             <div key={event.id} className="flex items-center gap-3 text-sm bg-white px-3 py-2 rounded-xl">
                                                 <span className="font-bold text-slate-900">{event.to_stage}</span>
                                                 <span className="text-slate-400">→</span>
@@ -570,7 +570,7 @@ const GuidedMoveModal: React.FC<{ batchId: number | null; isOpen: boolean; onClo
                                                         <span className="text-slate-400">→</span>
                                                     </>
                                                 )}
-                                                <span className="font-bold text-indigo-600">{event.output_wire_size_mm.toFixed(3)}mm</span>
+                                                <span className="font-bold text-indigo-600">{event.output_wire_size_mm?.toFixed(3)}mm</span>
                                                 {event.bobbin_count && (
                                                     <span className="text-xs text-slate-500 ml-auto">({event.bobbin_count} bobbins)</span>
                                                 )}
