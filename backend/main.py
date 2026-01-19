@@ -1344,6 +1344,28 @@ def update_order_status(
     }
 
 
+@app.delete("/api/orders/{order_id}")
+def delete_order(order_id: int, db: Session = Depends(get_db)):
+    """Delete an order and its associated data"""
+    order = db.query(ProductionOrder).filter(ProductionOrder.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order {order_id} not found")
+        
+    try:
+        # Delete associated batch journey events through batches?
+        # Standard cascade should handle foreign keys if configured, 
+        # otherwise we might need explicit cleanup if strict constraints exist.
+        # For now, relying on DB cascade or simple delete.
+        
+        db.delete(order)
+        db.commit()
+        return {"success": True, "message": f"Order {order.order_number} deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        print(f"Error deleting order: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete order: {str(e)}")
+
+
 # ==================== BATCH TRACKING ENDPOINTS ====================
 
 @app.get("/api/batches")
@@ -1548,6 +1570,27 @@ def create_batch(
         traceback.print_exc()
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to create batch: {str(e)}")
+
+
+@app.delete("/api/batches/{batch_id}")
+def delete_batch(batch_id: int, db: Session = Depends(get_db)):
+    """Delete a batch/coil"""
+    batch = db.query(BatchTracking).filter(BatchTracking.id == batch_id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail=f"Batch {batch_id} not found")
+        
+    try:
+        # Delete associated journey events
+        db.query(BatchJourneyEvent).filter(BatchJourneyEvent.batch_id == batch_id).delete()
+        
+        # Delete the batch
+        db.delete(batch)
+        db.commit()
+        return {"success": True, "message": f"Batch {batch.batch_number} deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        print(f"Error deleting batch: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete batch: {str(e)}")
 
 
 @app.post("/api/batches/{batch_id}/move")

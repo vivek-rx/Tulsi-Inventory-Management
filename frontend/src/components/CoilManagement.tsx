@@ -11,13 +11,15 @@ import {
     PlayCircle,
     MoveRight,
     Plus,
-    Activity
+    Activity,
+    Trash2
 } from 'lucide-react';
 import {
     getBatchDetail,
     moveBatchToStage,
     toggleBatchHold,
     createBatch,
+    deleteBatch,
     type BatchMovePayload,
     type BatchCreatePayload
 } from '../api';
@@ -55,6 +57,11 @@ const CoilManagement: React.FC<CoilManagementProps> = ({ batches = [], isLoading
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [holdDialogBatch, setHoldDialogBatch] = useState<BatchSummary | null>(null);
     const [holdReason, setHoldReason] = useState('');
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; batchId: number | null; batchNumber: string }>({
+        isOpen: false,
+        batchId: null,
+        batchNumber: ''
+    });
     const queryClient = useQueryClient();
 
     // Sync with global search
@@ -65,6 +72,21 @@ const CoilManagement: React.FC<CoilManagementProps> = ({ batches = [], isLoading
     }, [externalSearchTerm]);
 
     // --- Mutations ---
+
+    const deleteMutation = useMutation(
+        (batchId: number) => deleteBatch(batchId),
+        {
+            onSuccess: (data) => {
+                queryClient.invalidateQueries(['batches']);
+                onRefresh?.();
+                setDeleteConfirmation({ isOpen: false, batchId: null, batchNumber: '' });
+                toast.success(data.message || 'Coil deleted successfully');
+            },
+            onError: (error: any) => {
+                toast.error(error.response?.data?.detail || 'Failed to delete coil');
+            }
+        }
+    );
 
     const holdMutation = useMutation<
         { success: boolean; batch_id: number; batch_number: string; status: string; message: string },
@@ -126,6 +148,14 @@ const CoilManagement: React.FC<CoilManagementProps> = ({ batches = [], isLoading
     const handleCloseMoveModal = () => {
         setIsMoveModalOpen(false);
         setSelectedBatchId(null);
+    };
+
+    const handleDelete = (batch: BatchSummary) => {
+        setDeleteConfirmation({
+            isOpen: true,
+            batchId: batch.id,
+            batchNumber: batch.batch_number
+        });
     };
 
     const handleToggleHold = (batch: BatchSummary) => {
@@ -246,6 +276,7 @@ const CoilManagement: React.FC<CoilManagementProps> = ({ batches = [], isLoading
                                         batch={batch}
                                         onLog={() => handleOpenMoveModal(batch.id)}
                                         onToggleHold={() => handleToggleHold(batch)}
+                                        onDelete={() => handleDelete(batch)}
                                         isProcessingHold={holdMutation.isLoading && activeHoldBatchId === batch.id}
                                     />
                                 ))
@@ -279,6 +310,19 @@ const CoilManagement: React.FC<CoilManagementProps> = ({ batches = [], isLoading
                 onSuccess={() => onRefresh?.()}
                 orders={orders}
             />
+
+            <DeleteConfirmationDialog
+                isOpen={deleteConfirmation.isOpen}
+                title="Delete Coil"
+                message={`Are you sure you want to delete coil ${deleteConfirmation.batchNumber}? This action cannot be undone.`}
+                isDeleting={deleteMutation.isLoading}
+                onConfirm={() => {
+                    if (deleteConfirmation.batchId) {
+                        deleteMutation.mutate(deleteConfirmation.batchId);
+                    }
+                }}
+                onCancel={() => setDeleteConfirmation({ isOpen: false, batchId: null, batchNumber: '' })}
+            />
         </div>
     );
 };
@@ -289,8 +333,9 @@ const CoilCard: React.FC<{
     batch: BatchSummary;
     onLog: () => void;
     onToggleHold: () => void;
+    onDelete: () => void;
     isProcessingHold: boolean;
-}> = ({ batch, onLog, onToggleHold, isProcessingHold }) => {
+}> = ({ batch, onLog, onToggleHold, onDelete, isProcessingHold }) => {
     const isOnHold = batch.current_status === 'ON_HOLD';
     const isCompleted = batch.current_status === 'CONSUMED';
 
@@ -302,6 +347,7 @@ const CoilCard: React.FC<{
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
                 <div>
+                    {/* ... header content ... */}
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                             {batch.material_type || 'Unknown'}
@@ -383,6 +429,13 @@ const CoilCard: React.FC<{
                         }`}
                 >
                     {isProcessingHold ? <Loader2 size={18} className="animate-spin" /> : isOnHold ? <PlayCircle size={18} /> : <PauseCircle size={18} />}
+                </button>
+                <button
+                    onClick={onDelete}
+                    className="px-3 py-2.5 bg-white border border-slate-200 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors"
+                    title="Delete Coil"
+                >
+                    <Trash2 size={18} />
                 </button>
             </div>
         </div>
@@ -739,6 +792,51 @@ const AddCoilModal: React.FC<{ isOpen: boolean; onClose: () => void; onSuccess?:
                         {createMutation.isLoading ? 'Creating...' : 'Create Coil'}
                     </button>
                 </form>
+            </div>
+        </div>
+    );
+};
+
+const DeleteConfirmationDialog: React.FC<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    isDeleting: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+}> = ({ isOpen, title, message, isDeleting, onConfirm, onCancel }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+            <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl relative">
+                <button onClick={onCancel} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600">
+                    <X size={20} />
+                </button>
+                <div className="mb-6">
+                    <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-4">
+                        <Trash2 size={24} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
+                    <p className="text-slate-500 mt-2">{message}</p>
+                </div>
+                <div className="flex gap-3">
+                    <button
+                        onClick={onCancel}
+                        disabled={isDeleting}
+                        className="flex-1 py-3 font-bold text-slate-600 hover:bg-slate-50 rounded-2xl transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        disabled={isDeleting}
+                        className="flex-1 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                        {isDeleting && <Loader2 size={16} className="animate-spin" />}
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -195,6 +195,11 @@ export const getOrders = async (): Promise<any[]> => {
   return response.data;
 };
 
+export const deleteOrder = async (orderId: number): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/orders/${orderId}`);
+  return response.data;
+};
+
 // ==================== INVENTORY API FUNCTIONS ====================
 
 export interface StageInventory {
@@ -460,6 +465,11 @@ export const getBatchDetail = async (batchId: number): Promise<BatchDetail> => {
 
 export const createBatch = async (payload: BatchCreatePayload): Promise<{ success: boolean; batch: BatchSummary }> => {
   const response = await api.post('/batches', payload);
+  return response.data;
+};
+
+export const deleteBatch = async (batchId: number): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`/batches/${batchId}`);
   return response.data;
 };
 

@@ -12,9 +12,10 @@ import {
   Loader2,
   X,
   Calendar,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
-import { createOrder, type OrderCreatePayload } from '../api';
+import { createOrder, deleteOrder, type OrderCreatePayload } from '../api';
 import type { BatchSummary, Order } from '../types';
 
 
@@ -59,7 +60,27 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orders, isLoading, extern
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; orderId: number | null; orderNumber: string }>({
+    isOpen: false,
+    orderId: null,
+    orderNumber: ''
+  });
   const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation(
+    (orderId: number) => deleteOrder(orderId),
+    {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries(['orders']);
+        queryClient.invalidateQueries(['summary']);
+        setDeleteConfirmation({ isOpen: false, orderId: null, orderNumber: '' });
+        toast.success(data.message || 'Order deleted successfully');
+      },
+      onError: (error: any) => {
+        toast.error(error.response?.data?.detail || 'Failed to delete order');
+      }
+    }
+  );
 
   // Sync with global search
   React.useEffect(() => {
@@ -184,10 +205,19 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orders, isLoading, extern
                       <h4 className="text-lg font-bold text-slate-900">{order.order_number}</h4>
                       {getPriorityBadge(order.priority)}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border ${getStatusStyles(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      {order.status.replace('_', ' ')}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border ${getStatusStyles(order.status)}`}>
+                        {getStatusIcon(order.status)}
+                        {order.status.replace('_', ' ')}
+                      </span>
+                      <button
+                        onClick={() => setDeleteConfirmation({ isOpen: true, orderId: order.id, orderNumber: order.order_number })}
+                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Order"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600">
@@ -246,6 +276,19 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ orders, isLoading, extern
           queryClient.invalidateQueries(['orders']);
           queryClient.invalidateQueries(['summary']);
         }}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={deleteConfirmation.isOpen}
+        title="Delete Order"
+        message={`Are you sure you want to delete order ${deleteConfirmation.orderNumber}? This action cannot be undone.`}
+        isDeleting={deleteMutation.isLoading}
+        onConfirm={() => {
+          if (deleteConfirmation.orderId) {
+            deleteMutation.mutate(deleteConfirmation.orderId);
+          }
+        }}
+        onCancel={() => setDeleteConfirmation({ isOpen: false, orderId: null, orderNumber: '' })}
       />
     </div>
   );
@@ -430,6 +473,51 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onClose, on
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+const DeleteConfirmationDialog: React.FC<{
+  isOpen: boolean;
+  title: string;
+  message: string;
+  isDeleting: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ isOpen, title, message, isDeleting, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl relative">
+        <button onClick={onCancel} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600">
+          <X size={20} />
+        </button>
+        <div className="mb-6">
+          <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-4">
+            <Trash2 size={24} />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
+          <p className="text-slate-500 mt-2">{message}</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={isDeleting}
+            className="flex-1 py-3 font-bold text-slate-600 hover:bg-slate-50 rounded-2xl transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className="flex-1 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+          >
+            {isDeleting && <Loader2 size={16} className="animate-spin" />}
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );
