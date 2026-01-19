@@ -187,6 +187,14 @@ export const createOrder = async (payload: OrderCreatePayload): Promise<{ succes
   return response.data;
 };
 
+/**
+ * Get all production orders
+ */
+export const getOrders = async (): Promise<any[]> => {
+  const response = await api.get('/orders');
+  return response.data;
+};
+
 // ==================== INVENTORY API FUNCTIONS ====================
 
 export interface StageInventory {

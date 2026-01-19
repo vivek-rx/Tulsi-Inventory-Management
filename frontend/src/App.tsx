@@ -35,6 +35,7 @@ import {
   getStatisticsSummary,
   getAllInventory,
   getBatchSummaries,
+  getOrders,
 } from './api';
 
 import SummaryCards from './components/SummaryCards';
@@ -142,11 +143,7 @@ function AuthenticatedApp() {
 
   const { data: orders, isLoading: ordersLoading, refetch: refetchOrders } = useQuery(
     ['orders'],
-    async () => {
-      const response = await fetch('/api/orders');
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      return response.json();
-    },
+    () => getOrders(),
     { refetchInterval: 30000 }
   );
 
