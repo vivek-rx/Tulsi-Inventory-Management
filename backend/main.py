@@ -231,6 +231,11 @@ class BatchMovePayload(BaseModel):
     scrap_quantity: float = Field(default=0.0, ge=0)
     operator: Optional[str] = None
     notes: Optional[str] = None
+    
+    # Wire size tracking
+    input_wire_size_mm: Optional[float] = Field(default=None, description="Input wire size in mm")
+    output_wire_size_mm: Optional[float] = Field(default=None, description="Output wire size in mm after processing")
+    bobbin_count: Optional[int] = Field(default=None, ge=1, description="Number of bobbins created")
 
 
 class BatchHoldPayload(BaseModel):
@@ -257,12 +262,16 @@ def _get_next_stage(current_stage: Optional[str], stage_sequence: List[str]) -> 
 
 
 def _serialize_journey_event(event: BatchJourneyEvent) -> dict:
+    """Convert a BatchJourneyEvent to a dictionary"""
     return {
         "id": event.id,
         "from_stage": event.from_stage,
         "to_stage": event.to_stage,
         "quantity": event.quantity,
         "scrap_quantity": event.scrap_quantity,
+        "input_wire_size_mm": event.input_wire_size_mm,
+        "output_wire_size_mm": event.output_wire_size_mm,
+        "bobbin_count": event.bobbin_count,
         "operator": event.operator,
         "notes": event.notes,
         "movement_date": event.movement_date.isoformat() if event.movement_date else None,
@@ -1432,6 +1441,44 @@ def get_batch_detail(batch_id: int, db: Session = Depends(get_db)):
     return detail
 
 
+@app.get("/api/batches/{batch_id}/available-sizes")
+def get_available_sizes(
+    batch_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_routes.get_current_active_user)
+):
+    """
+    Get available wire sizes for a batch based on its journey history.
+    Returns the output sizes from the most recent stage.
+    """
+    batch = db.query(BatchTracking).filter(BatchTracking.id == batch_id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail=f"Batch {batch_id} not found")
+    
+    # Get the most recent journey event with wire size information
+    latest_event = db.query(BatchJourneyEvent)\
+        .filter(BatchJourneyEvent.batch_id == batch_id)\
+        .filter(BatchJourneyEvent.output_wire_size_mm.isnot(None))\
+        .order_by(BatchJourneyEvent.movement_date.desc())\
+        .first()
+    
+    available_sizes = []
+    if latest_event and latest_event.output_wire_size_mm:
+        available_sizes.append({
+            "size_mm": latest_event.output_wire_size_mm,
+            "stage": latest_event.to_stage,
+            "date": latest_event.movement_date.isoformat() if latest_event.movement_date else None,
+            "bobbin_count": latest_event.bobbin_count
+        })
+    
+    return {
+        "batch_id": batch_id,
+        "batch_number": batch.batch_number,
+        "current_stage": batch.current_stage,
+        "available_sizes": available_sizes
+    }
+
+
 @app.post("/api/batches")
 def create_batch(
     payload: BatchCreatePayload, 
@@ -1551,12 +1598,23 @@ def move_batch_forward(
     if payload.scrap_quantity > available_qty:
         raise HTTPException(status_code=400, detail=f"Cannot scrap {payload.scrap_quantity} kg; only {available_qty} kg remaining on batch {batch.batch_number}")
 
+    # Wire size validation
+    if payload.input_wire_size_mm and payload.output_wire_size_mm:
+        if payload.output_wire_size_mm >= payload.input_wire_size_mm:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Output size ({payload.output_wire_size_mm}mm) must be smaller than input size ({payload.input_wire_size_mm}mm). Wire can only be drawn down, not made thicker."
+            )
+
     event = BatchJourneyEvent(
         batch_id=batch.id,
         from_stage=previous_stage,
         to_stage=target_stage,
         quantity=payload.quantity,
         scrap_quantity=payload.scrap_quantity,
+        input_wire_size_mm=payload.input_wire_size_mm,
+        output_wire_size_mm=payload.output_wire_size_mm,
+        bobbin_count=payload.bobbin_count,
         operator=payload.operator,
         notes=payload.notes
     )

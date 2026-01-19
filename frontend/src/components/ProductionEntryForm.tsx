@@ -5,7 +5,7 @@ import { NumericFormat } from 'react-number-format';
 import { Listbox, Transition } from '@headlessui/react';
 import { ArrowRight, Package2, Gauge, Check, AlertCircle, Maximize2 } from 'lucide-react';
 
-import { moveBatchToStage, type BatchMovePayload } from '../api';
+import { moveBatchToStage, getAvailableSizes, type BatchMovePayload } from '../api';
 import type { BatchSummary, StageEnum } from '../types';
 
 interface OrderOption {
@@ -30,7 +30,11 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
     quantity: '',
     unit: 'kg',
     scrap: '0',
-    notes: ''
+    notes: '',
+    // Wire size fields
+    inputWireSize: '',
+    outputWireSize: '',
+    bobbinCount: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +77,32 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
     }
   }, [selectedBatch, orders]);
 
+  // Fetch available sizes when batch is selected
+  useEffect(() => {
+    if (selectedBatch) {
+      getAvailableSizes(selectedBatch.id)
+        .then(data => {
+          if (data.available_sizes.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              inputWireSize: String(data.available_sizes[0].size_mm)
+            }));
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch available sizes:', err);
+        });
+    } else {
+      // Clear wire sizes when no batch selected
+      setFormData(prev => ({
+        ...prev,
+        inputWireSize: '',
+        outputWireSize: '',
+        bobbinCount: ''
+      }));
+    }
+  }, [selectedBatch]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -102,6 +132,17 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
       }
     }
 
+    // Wire size validation
+    const inputSize = Number(formData.inputWireSize);
+    const outputSize = Number(formData.outputWireSize);
+    if (inputSize && outputSize && outputSize >= inputSize) {
+      toast.error('Output size must be smaller than input size. Wire can only be drawn down!', {
+        icon: '⚠️',
+        style: { background: '#fff', color: '#1e293b', border: '1px solid #e2e8f0' }
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -110,7 +151,11 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
           to_stage: resolveStageEnum(formData.stage),
           quantity: Number(formData.quantity),
           scrap_quantity: Number(formData.scrap || '0'),
-          notes: formData.notes || undefined
+          notes: formData.notes || undefined,
+          // Wire size fields
+          input_wire_size_mm: formData.inputWireSize ? Number(formData.inputWireSize) : undefined,
+          output_wire_size_mm: formData.outputWireSize ? Number(formData.outputWireSize) : undefined,
+          bobbin_count: formData.bobbinCount ? Number(formData.bobbinCount) : undefined
         };
 
         await moveBatchToStage(selectedBatch.id, payload);
@@ -151,7 +196,10 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
         quantity: '',
         unit: formData.unit,
         scrap: '0',
-        notes: ''
+        notes: '',
+        inputWireSize: '',
+        outputWireSize: '',
+        bobbinCount: ''
       });
       setSelectedBatch(null);
       setSelectedOrder(null);
@@ -328,6 +376,81 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
               </div>
             </div>
           </div>
+
+          {/* Wire Size Inputs - Show for production stages */}
+          {formData.stage !== 'Quality Check' && formData.stage !== 'Packaging' && formData.stage !== 'Dispatch' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-slate-700">
+                    Input Wire Size (mm)
+                  </label>
+                  <NumericFormat
+                    value={formData.inputWireSize}
+                    onValueChange={(values) => {
+                      setFormData(prev => ({ ...prev, inputWireSize: values.value }));
+                    }}
+                    thousandSeparator={false}
+                    decimalScale={3}
+                    fixedDecimalScale={false}
+                    allowNegative={false}
+                    placeholder="3.150"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base font-medium text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all bg-white shadow-sm placeholder:text-slate-300"
+                    disabled={formData.stage !== 'RBD' && selectedBatch}
+                  />
+                  {formData.stage !== 'RBD' && selectedBatch && (
+                    <p className="text-xs text-slate-500">From previous stage</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-slate-700">
+                    Output Wire Size (mm)
+                  </label>
+                  <NumericFormat
+                    value={formData.outputWireSize}
+                    onValueChange={(values) => {
+                      setFormData(prev => ({ ...prev, outputWireSize: values.value }));
+                    }}
+                    thousandSeparator={false}
+                    decimalScale={3}
+                    fixedDecimalScale={false}
+                    allowNegative={false}
+                    placeholder="2.900"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base font-medium text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all bg-white shadow-sm placeholder:text-slate-300"
+                  />
+                  <p className="text-xs text-slate-500">After drawing/processing</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-slate-700">
+                    Bobbin Count (Optional)
+                  </label>
+                  <NumericFormat
+                    value={formData.bobbinCount}
+                    onValueChange={(values) => {
+                      setFormData(prev => ({ ...prev, bobbinCount: values.value }));
+                    }}
+                    thousandSeparator={false}
+                    decimalScale={0}
+                    allowNegative={false}
+                    placeholder="1"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base font-medium text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all bg-white shadow-sm placeholder:text-slate-300"
+                  />
+                  <p className="text-xs text-slate-500">Number of bobbins</p>
+                </div>
+              </div>
+
+              {/* Size validation warning */}
+              {formData.inputWireSize && formData.outputWireSize &&
+                Number(formData.outputWireSize) >= Number(formData.inputWireSize) && (
+                  <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl border border-red-200">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <p>Output size must be smaller than input size. Wire can only be drawn down!</p>
+                  </div>
+                )}
+            </>
+          )}
 
           <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">Assign to Order (Optional)</label>

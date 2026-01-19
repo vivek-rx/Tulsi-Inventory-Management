@@ -413,6 +413,10 @@ export interface BatchMovePayload {
   scrap_quantity?: number;
   operator?: string;
   notes?: string;
+  // Wire size tracking
+  input_wire_size_mm?: number;
+  output_wire_size_mm?: number;
+  bobbin_count?: number;
 }
 
 export interface BatchHoldPayload {
@@ -472,6 +476,24 @@ export const toggleBatchHold = async (
   payload: BatchHoldPayload
 ): Promise<{ success: boolean; batch_id: number; batch_number: string; status: string; message: string }> => {
   const response = await api.post(`/batches/${batchId}/hold`, payload);
+  return response.data;
+};
+
+/**
+ * Get available wire sizes for a batch
+ */
+export const getAvailableSizes = async (batchId: number): Promise<{
+  batch_id: number;
+  batch_number: string;
+  current_stage: string;
+  available_sizes: Array<{
+    size_mm: number;
+    stage: string;
+    date: string | null;
+    bobbin_count: number | null;
+  }>;
+}> => {
+  const response = await api.get(`/batches/${batchId}/available-sizes`);
   return response.data;
 };
 

@@ -152,6 +152,12 @@ class BatchJourneyEvent(Base):
     to_stage = Column(String, nullable=False)
     quantity = Column(Float, nullable=False)
     scrap_quantity = Column(Float, default=0.0)
+    
+    # Wire size tracking
+    input_wire_size_mm = Column(Float, nullable=True)   # Input size for this movement
+    output_wire_size_mm = Column(Float, nullable=True)  # Output size after processing
+    bobbin_count = Column(Integer, nullable=True)       # Number of bobbins created
+    
     operator = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     movement_date = Column(DateTime(timezone=True), server_default=func.now())
