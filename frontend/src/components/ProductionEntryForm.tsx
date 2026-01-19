@@ -396,7 +396,7 @@ const ProductionEntryForm: React.FC<ProductionEntryFormProps> = ({ onSuccess, on
                     allowNegative={false}
                     placeholder="3.150"
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base font-medium text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all bg-white shadow-sm placeholder:text-slate-300"
-                    disabled={formData.stage !== 'RBD' && selectedBatch}
+                    disabled={formData.stage !== 'RBD' && !!selectedBatch}
                   />
                   {formData.stage !== 'RBD' && selectedBatch && (
                     <p className="text-xs text-slate-500">From previous stage</p>
