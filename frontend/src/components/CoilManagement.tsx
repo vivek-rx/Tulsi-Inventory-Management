@@ -553,6 +553,33 @@ const GuidedMoveModal: React.FC<{ batchId: number | null; isOpen: boolean; onClo
                             </div>
                         </div>
 
+                        {/* Wire Size History */}
+                        {data.journey_events && data.journey_events.some(e => e.output_wire_size_mm) && (
+                            <div className="space-y-3 p-4 bg-slate-50 rounded-2xl">
+                                <h4 className="text-sm font-bold text-slate-700">Wire Size History</h4>
+                                <div className="space-y-2">
+                                    {data.journey_events
+                                        .filter(e => e.output_wire_size_mm)
+                                        .map((event, idx) => (
+                                            <div key={event.id} className="flex items-center gap-3 text-sm bg-white px-3 py-2 rounded-xl">
+                                                <span className="font-bold text-slate-900">{event.to_stage}</span>
+                                                <span className="text-slate-400">→</span>
+                                                {event.input_wire_size_mm && (
+                                                    <>
+                                                        <span className="text-slate-600">{event.input_wire_size_mm.toFixed(3)}mm</span>
+                                                        <span className="text-slate-400">→</span>
+                                                    </>
+                                                )}
+                                                <span className="font-bold text-indigo-600">{event.output_wire_size_mm.toFixed(3)}mm</span>
+                                                {event.bobbin_count && (
+                                                    <span className="text-xs text-slate-500 ml-auto">({event.bobbin_count} bobbins)</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={moveMutation.isLoading}
