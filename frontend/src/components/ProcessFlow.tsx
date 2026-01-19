@@ -37,9 +37,29 @@ const ProcessFlow: React.FC<ProcessFlowProps> = ({ nodes, isLoading }) => {
     critical: 'Critical',
   };
 
+  const stageOrder = [
+    'RBD',
+    'Inter',
+    'Oven',
+    'DPC',
+    'Rewind',
+    'Quality Check',
+    'Packaging',
+    'Dispatch'
+  ];
+
+  const sortedNodes = [...nodes].sort((a, b) => {
+    const indexA = stageOrder.indexOf(a.stage);
+    const indexB = stageOrder.indexOf(b.stage);
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-      {nodes.map((node) => (
+      {sortedNodes.map((node) => (
         <div
           key={node.stage}
           className="panel panel-tonal p-6 flex flex-col justify-between h-full min-h-[200px] relative overflow-hidden group"
@@ -70,8 +90,8 @@ const ProcessFlow: React.FC<ProcessFlowProps> = ({ nodes, isLoading }) => {
               <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${node.status === 'critical' ? 'bg-rose-500' :
-                      node.status === 'warning' ? 'bg-amber-500' :
-                        'bg-emerald-500'
+                    node.status === 'warning' ? 'bg-amber-500' :
+                      'bg-emerald-500'
                     }`}
                   style={{ width: `${node.efficiency}%` }}
                 />

@@ -45,6 +45,28 @@ const InventoryOverview: React.FC<InventoryOverviewProps> = ({ inventory }) => {
   const totalStock = inventory.reduce((sum, item) => sum + item.current_stock, 0);
   const lowStockCount = inventory.filter(item => item.stock_status === 'LOW').length;
 
+  // Sort inventory based on the correct process flow
+  const stageOrder = [
+    'RBD',
+    'Inter',
+    'Oven',
+    'DPC',
+    'Rewind',
+    'Quality Check',
+    'Packaging',
+    'Dispatch'
+  ];
+
+  const sortedInventory = [...inventory].sort((a, b) => {
+    const indexA = stageOrder.indexOf(a.stage);
+    const indexB = stageOrder.indexOf(b.stage);
+    // Put unknown stages at the end
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -81,7 +103,7 @@ const InventoryOverview: React.FC<InventoryOverviewProps> = ({ inventory }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 pt-6">
-        {inventory.map((item, index) => {
+        {sortedInventory.map((item, index) => {
           const stockPercentage = ((item.current_stock - item.min_stock_level) /
             (item.max_stock_level - item.min_stock_level)) * 100;
 
@@ -90,7 +112,10 @@ const InventoryOverview: React.FC<InventoryOverviewProps> = ({ inventory }) => {
             'Inter': 'from-blue-500 to-blue-600',
             'Oven': 'from-orange-500 to-orange-600',
             'DPC': 'from-teal-500 to-teal-600',
-            'Rewind': 'from-green-500 to-green-600'
+            'Rewind': 'from-green-500 to-green-600',
+            'Quality Check': 'from-pink-500 to-pink-600',
+            'Packaging': 'from-indigo-500 to-indigo-600',
+            'Dispatch': 'from-slate-700 to-slate-800'
           };
 
           const bgColor = stageColors[item.stage as keyof typeof stageColors] || 'from-gray-500 to-gray-600';

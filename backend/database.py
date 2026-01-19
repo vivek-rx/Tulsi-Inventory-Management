@@ -13,8 +13,16 @@ from dotenv import load_dotenv
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-# Get DATABASE_URL from environment
+# Get DATABASE_URL from environment (prefer Neon, fallback to legacy SUPABASE_DB_URL)
 DATABASE_URL = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
+
+# Normalize common copy/paste formats (e.g. "psql 'postgres://...'")
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.strip()
+    if DATABASE_URL.startswith("psql "):
+        DATABASE_URL = DATABASE_URL.replace("psql ", "", 1).strip()
+    if DATABASE_URL.startswith("'") and DATABASE_URL.endswith("'"):
+        DATABASE_URL = DATABASE_URL[1:-1]
 
 if not DATABASE_URL:
     print("❌ CRITICAL: DATABASE_URL is missing! Application cannot start.")
@@ -35,7 +43,7 @@ engine = create_engine(
     max_overflow=10,
     pool_recycle=300
 )
-print("✅ Connected to Supabase PostgreSQL")
+print("✅ Connected to PostgreSQL")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
