@@ -344,6 +344,25 @@ const CoilCard: React.FC<{
                     <span>Rem: {batch.remaining_quantity?.toFixed(1)} kg</span>
                     <span>Total: {batch.quantity.toFixed(1)} kg</span>
                 </div>
+                {/* Wire Size Display */}
+                {batch.last_movement?.output_wire_size_mm && (
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-slate-500">Wire Size</span>
+                            <span className="text-sm font-bold text-indigo-600">
+                                {batch.last_movement.output_wire_size_mm.toFixed(3)}mm
+                            </span>
+                        </div>
+                        {batch.last_movement.bobbin_count && (
+                            <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs font-medium text-slate-500">Bobbins</span>
+                                <span className="text-xs font-semibold text-slate-700">
+                                    {batch.last_movement.bobbin_count}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Actions */}

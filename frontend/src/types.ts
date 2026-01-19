@@ -139,6 +139,9 @@ export interface BatchJourneyEvent {
   to_stage: string;
   quantity: number;
   scrap_quantity: number;
+  input_wire_size_mm?: number | null;
+  output_wire_size_mm?: number | null;
+  bobbin_count?: number | null;
   operator?: string | null;
   notes?: string | null;
   movement_date?: string | null;
